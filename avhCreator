@@ -1,0 +1,67 @@
+<?php
+
+// Configuration
+$www_dir          = 'C:/wamp/www/';
+$httpdVhosts 			= 'C:\wamp\bin\apache\apache2.4.9\conf\extra\httpd-vhosts.conf';
+$apache_service_name 	= 'wampapache64';
+// stop editing
+
+
+$domain 		= isset($argv[1])? $argv[1] : false;
+$public 		= isset($argv[2])? $argv[2] : "public";
+$hosts 					= 'C:\Windows\System32\drivers\etc\hosts';
+
+if(!$domain){
+	die("Please, provide the domain's name at the first parameter");
+}
+
+$domain = str_replace("www.", '', $domain);
+
+
+echo "\nCreating '$domain' directory...";
+if(!is_dir($www_dir.$domain)){
+	mkdir($www_dir.$domain); echo " OK";
+}else{
+	echo "\n'$domain' directory already exists";
+}
+
+echo "\nCreating '$public' directory...";
+if(!is_dir($www_dir.$domain."/".$public)){
+	mkdir($www_dir.$domain."/".$public); echo " OK";
+}else{
+	echo "\n'$domain/$public' directory already exists";
+}
+
+
+
+echo "\nCreating virtual host in httpd-vhosts.conf file...";
+$text = "
+\n<VirtualHost $domain>   
+\tDocumentRoot $www_dir$domain/$public
+\tServerName $domain
+</VirtualHost>";
+file_put_contents($httpdVhosts, $text, FILE_APPEND | LOCK_EX);
+echo " OK";
+
+
+
+echo "\nUpdating hosts file...";
+$text = "\n127.0.0.1\t$domain";
+file_put_contents($hosts, $text, FILE_APPEND | LOCK_EX);
+echo " OK";
+
+echo "\nStoping apache service...";
+exec("NET STOP $apache_service_name");
+echo " OK";
+echo "\nStarting apache service...";
+exec("NET START $apache_service_name");
+echo " OK";
+
+if($file = fopen($www_dir.$domain."/".$public."/index.html",'w')){
+    $html = "<!DOCTYPE html> <html> <head><title>Yeah!</title><style type=text/css>body{background-color: #111;text-align: center;}h1{text-align: center;font-family: Arial;font-size: 60px;color: #00FF0C;text-shadow: 0 0 15px #000;}img{margin: 50px 0 0 0;display: inline-table;box-shadow: 0 0 15px #000;}</style></head> <body> <h1>Fuck yeah!</h1> <img src='https://media.giphy.com/media/RrVzUOXldFe8M/giphy.gif'> </body> </html>";
+    fwrite($file, $html);
+    fclose($file);
+}
+
+
+echo "\nOpen your browser and access the following url: http://$domain";
