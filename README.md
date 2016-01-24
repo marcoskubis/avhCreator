@@ -21,8 +21,8 @@ $apache_service_name = 'wampapache64';
 </pre>
 
 ### Running
-First, download the `avhCreator` file from this repository.
-In terminal run this command:
+First, download the `avhCreator` file from this repository.<br />
+Open terminal as Administrator and run this command:
 <pre>
 cd /location/of/avhCreator/file
 php avhCreator &ltserverName&gt &ltpublicFolder&gt
